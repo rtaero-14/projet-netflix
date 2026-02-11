@@ -1,0 +1,13 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+/* design tokens */
+:root {
+  --color-primary: #e50914;
+  --color-primary-dark: #b20710;
+}
+
+/* Fallback utility rules in case purge misses them in templates */
+.bg-gray-900 { background-color: #111827; }
+.text-white { color: #ffffff; }
+.text-primary { color: var(--color-primary); }
