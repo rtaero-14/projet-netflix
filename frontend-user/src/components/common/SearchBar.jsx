@@ -4,12 +4,24 @@ function SearchBar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 
+	const handleChange = (e) => {
+		const v = e.target.value;
+		setSearchTerm(v);
+		console.log('Recherche (change):', v);
+	};
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		console.log('Recherche (submit):', searchTerm);
+	};
+
 	return (
 		<div className="relative">
 			{/* Bouton de recherche */}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
 				className="hover:text-gray-300 transition-colors"
+				aria-label="Ouvrir la recherche"
 			>
 				<svg
 					className="w-6 h-6"
@@ -29,14 +41,22 @@ function SearchBar() {
 			{/* Input de recherche (apparaît au clic) */}
 			{isOpen && (
 				<div className="absolute top-12 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-2 z-50">
-					<input
-						type="text"
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.target.value)}
-						placeholder="Rechercher un film..."
-						className="w-64 px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:border-primary text-white"
-						autoFocus
-					/>
+					<form onSubmit={handleSubmit} className="flex items-center">
+						<input
+							type="text"
+							value={searchTerm}
+							onChange={handleChange}
+							placeholder="Rechercher un film..."
+							className="w-64 px-4 py-2 bg-gray-900 border border-gray-700 rounded-l-lg focus:outline-none focus:border-primary text-white"
+							autoFocus
+						/>
+						<button
+							type="submit"
+							className="px-3 py-2 bg-primary text-white rounded-r-lg ml-2 text-sm"
+						>
+							Rechercher
+						</button>
+					</form>
 				</div>
 			)}
 		</div>

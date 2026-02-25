@@ -9,7 +9,7 @@ function Button({
 	type = 'button',
 }) {
 	const baseClasses =
-		'font-semibold rounded transition-all duration-300 inline-flex items-center justify-center';
+		'font-semibold rounded transition-all duration-300 inline-flex items-center justify-center box-border';
 
 	const variants = {
 		primary: 'bg-primary hover:bg-primary-dark text-white shadow-lg hover:shadow-xl',

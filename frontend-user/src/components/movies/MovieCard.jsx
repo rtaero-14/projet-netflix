@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '../common/Button';
+import MovieDescription from './MovieDescription';
 
 function MovieCard({ movie }) {
+  const [isLiked, setIsLiked] = useState(false);
+
+  const toggleLike = () => {
+    setIsLiked((s) => !s);
+  };
   const genreColors = {
     'Action': 'bg-red-500',
     'Comédie': 'bg-yellow-500',
@@ -10,8 +16,9 @@ function MovieCard({ movie }) {
     'Horreur': 'bg-orange-500',
     'Thriller': 'bg-gray-500'
   };
-    return (
-        <div className="group relative overflow-hidden rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105">
+  return (
+  <>
+    <div className="group relative overflow-hidden rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105">
             {/* Image */}
             <div className="relative aspect-[2/3]">
                 <img
@@ -41,24 +48,29 @@ function MovieCard({ movie }) {
                   <span className="text-gray-400">{movie.duration}min</span>
               </div>
 
-              <p className="text-xs text-gray-400 line-clamp-2 mb-3">
-                  {movie.description}
-              </p>
+              {/* Description inline with toggle */}
+              <MovieDescription description={movie.description} />
 
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 mt-3">
                 <Button size="sm" className="flex-1">
                   ▶ Louer {movie.price}€
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 text-xs">
-                  + Info
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`text-xs ${isLiked ? 'bg-red-600 border-red-600 text-white' : ''}`}
+                  onClick={toggleLike}
+                >
+                  {isLiked ? '♥ Aimé' : '♡ J\'aime'}
                 </Button>
               </div>
             </div>
 
-        {/* <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
-        </div> */}
-        </div>
+        {/* <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
+    </div>
+
+  {/* (inline description is rendered inside the overlay) */}
+    </>
   );
 }
 
