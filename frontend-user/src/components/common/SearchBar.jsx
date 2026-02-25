@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 function SearchBar() {
 	const [isOpen, setIsOpen] = useState(false);
@@ -15,8 +15,23 @@ function SearchBar() {
 		console.log('Recherche (submit):', searchTerm);
 	};
 
+	const containerRef = useRef(null);
+
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const handleOutsideClick = (e) => {
+			if (containerRef.current && !containerRef.current.contains(e.target)) {
+				setIsOpen(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleOutsideClick);
+		return () => document.removeEventListener('mousedown', handleOutsideClick);
+	}, [isOpen]);
+
 	return (
-		<div className="relative">
+		<div className="relative" ref={containerRef}>
 			{/* Bouton de recherche */}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
