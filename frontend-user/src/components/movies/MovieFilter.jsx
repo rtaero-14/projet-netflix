@@ -3,7 +3,6 @@ import React, { useState, useMemo } from 'react';
 function MovieFilter({ movies = [], onFilter = () => {} }) {
 	const [selectedGenre, setSelectedGenre] = useState('all');
 
-	// Extraire la liste unique des genres
 	const genres = useMemo(() => {
 		const set = new Set();
 		movies.forEach((m) => {
@@ -15,7 +14,6 @@ function MovieFilter({ movies = [], onFilter = () => {} }) {
 	const handleGenreChange = (genre) => {
 		setSelectedGenre(genre);
 
-		// Filtrer les films
 		if (genre === 'all') {
 			onFilter(movies);
 		} else {
@@ -52,4 +50,3 @@ function MovieFilter({ movies = [], onFilter = () => {} }) {
 }
 
 export default MovieFilter;
-

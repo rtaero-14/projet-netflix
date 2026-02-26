@@ -4,6 +4,7 @@ import MovieDescription from './MovieDescription';
 
 function MovieCard({ movie }) {
   const [isLiked, setIsLiked] = useState(false);
+  
 
   const toggleLike = () => {
     setIsLiked((s) => !s);
@@ -52,7 +53,11 @@ function MovieCard({ movie }) {
               <MovieDescription description={movie.description} />
 
               <div className="flex flex-col sm:flex-row gap-2 mt-3">
-                <Button size="sm" className="flex-1">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => window.dispatchEvent(new CustomEvent('add-to-cart', { detail: movie }))}
+                >
                   ▶ Louer {movie.price}€
                 </Button>
                 <Button

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import SearchBar from './SearchBar';
+import CartButton from './CartButton';
 
 function Navbar({ movies = [], onSearch = () => {} }) {
     const [isScrolled, _setIsScrolled] = useState(false);
@@ -41,7 +42,10 @@ function Navbar({ movies = [], onSearch = () => {} }) {
                     <div className="flex items-center space-x-4">
                         {/* Search Icon (receives movies and onSearch from parent) */}
                         <SearchBar movies={movies} onSearch={onSearch} />
-                        
+
+                        {/* Cart Button */}
+                        <CartButton />
+
                         {/* User Avatar */}
                         <div className="w-8 h-8 bg-primary rounded flex items-center justify-center cursor-pointer hover:bg-primary-dark transition-colors">
                             <span className="text-sm font-bold">U</span>
