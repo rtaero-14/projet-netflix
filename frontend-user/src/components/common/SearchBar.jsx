@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 
 function SearchBar({ movies = [], onSearch = () => {} }) {
+	
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
-
 	const handleChange = (e) => {
 		const v = e.target.value;
 		setSearchTerm(v);
@@ -44,7 +44,7 @@ function SearchBar({ movies = [], onSearch = () => {} }) {
 
 	return (
 		<div className="relative" ref={containerRef}>
-			{/* Bouton de recherche */}
+			{/*Bouton "Rechercher"*/}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
 				className="hover:text-gray-300 transition-colors"
@@ -65,7 +65,7 @@ function SearchBar({ movies = [], onSearch = () => {} }) {
 				</svg>
 			</button>
 
-			{/* Input de recherche*/}
+			{/*Input de l'utilisateur pour la recherche*/}
 			{isOpen && (
 				<div className="absolute top-full right-0 mt-2 shadow-lg z-50 w-96">
 					<div className="bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
@@ -87,23 +87,32 @@ function SearchBar({ movies = [], onSearch = () => {} }) {
 						</form>
 					</div>
 
-					{/* Dropdown suggestions */}
+					{/*Suggestions de la barre de recherche*/}
 					{suggestions.length > 0 && (
 						<ul className="mt-2 max-h-52 overflow-auto bg-gray-900 border border-gray-700 rounded-lg w-96">
-							{suggestions.map((m) => (
-								<li
-									key={m.id}
-									className="px-3 py-2 hover:bg-gray-800 rounded cursor-pointer text-sm"
-									onClick={() => {
-										setSearchTerm(m.title);
-										setIsOpen(false);
-										onSearch(m);
-									}}
-								>
-									<div className="font-semibold">{m.title}</div>
-									<div className="text-xs text-gray-400">{m.year} • {m.genre}</div>
-								</li>
-							))}
+								{suggestions.map((m) => (
+									<li
+										key={m.id}
+										className="flex items-start gap-3 px-3 py-2 hover:bg-gray-800 rounded cursor-pointer text-sm"
+										onClick={() => {
+											setSearchTerm(m.title);
+											setIsOpen(false);
+											onSearch(m);
+										}}
+									>
+										{/*Miniature du film dans les suggestions*/}
+										<img
+											src={m.poster || m.backdrop || ''}
+											alt={m.title}
+											className="w-12 h-16 object-cover rounded"
+											loading="lazy"
+										/>
+										<div className="flex-1">
+											<div className="font-semibold">{m.title}</div>
+											<div className="text-xs text-gray-400">{m.year} • {m.genre}</div>
+										</div>
+									</li>
+								))}
 						</ul>
 					)}
 				</div>
