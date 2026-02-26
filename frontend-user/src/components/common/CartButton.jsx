@@ -125,7 +125,6 @@ function CartButton() {
         </div>
       )}
 
-      {/* Floating confirm popover rendered outside the cart list, near the delete button */}
       {confirmRemoveId && confirmPos && (
         <div
           style={{ position: 'fixed', top: confirmPos.top - 10, left: confirmPos.left + 8, zIndex: 60 }}

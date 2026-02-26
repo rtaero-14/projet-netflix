@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import CartButton from './CartButton';
 
@@ -14,39 +15,39 @@ function Navbar({ movies = [], onSearch = () => {} }) {
         >
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
-                    {/* Logo */}
+                    {/*Logo*/}
                     <div className="flex items-center space-x-8">
                         <h1 className="text-primary text-3xl font-bold tracking-tight">MONSIEUR MINGO EST GÉNIAL</h1>
 
-                        {/* Navigation Links */}
+                        {/*Liens de navigation*/}
                         <ul className="hidden md:flex space-x-6">
                             <li>
-                                <a href="#" className="hover:text-gray-300 transition-colors">
+                                <NavLink to="/" className={({ isActive }) => isActive ? 'text-primary font-bold' : 'text-gray-300 hover:text-white' }>
                                     Accueil
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="#" className="hover:text-gray-300 transition-colors">
+                                <NavLink to="/movies" className={({ isActive }) => isActive ? 'text-primary font-bold' : 'text-gray-300 hover:text-white' }>
                                     Films
-                                </a>
+                                </NavLink>
                             </li>
                             <li>
-                                <a href="#" className="hover:text-gray-300 transition-colors">
+                                <NavLink to="/my-rentals" className={({ isActive }) => isActive ? 'text-primary font-bold' : 'text-gray-300 hover:text-white' }>
                                     Mes locations
-                                </a>
+                                </NavLink>
                             </li>
                         </ul>
                     </div>
 
-                    {/* User Section */}
+                    {/*Section de l'utilisateur*/}
                     <div className="flex items-center space-x-4">
-                        {/* Search Icon (receives movies and onSearch from parent) */}
+                        {/*Barre de recherche*/}
                         <SearchBar movies={movies} onSearch={onSearch} />
 
-                        {/* Cart Button */}
+                        {/*Panier*/}
                         <CartButton />
 
-                        {/* User Avatar */}
+                        {/*Profil utilisateur*/}
                         <div className="w-8 h-8 bg-primary rounded flex items-center justify-center cursor-pointer hover:bg-primary-dark transition-colors">
                             <span className="text-sm font-bold">U</span>
                         </div>
