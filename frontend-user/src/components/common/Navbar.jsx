@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import SearchBar from './SearchBar';
 
-function Navbar() {
-        const [isScrolled, _setIsScrolled] = useState(false);
+function Navbar({ movies = [], onSearch = () => {} }) {
+    const [isScrolled, _setIsScrolled] = useState(false);
     return (
         <nav
             className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
@@ -39,8 +39,8 @@ function Navbar() {
 
                     {/* User Section */}
                     <div className="flex items-center space-x-4">
-                        {/* Search Icon */}
-                        <SearchBar />
+                        {/* Search Icon (receives movies and onSearch from parent) */}
+                        <SearchBar movies={movies} onSearch={onSearch} />
                         
                         {/* User Avatar */}
                         <div className="w-8 h-8 bg-primary rounded flex items-center justify-center cursor-pointer hover:bg-primary-dark transition-colors">

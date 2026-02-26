@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Navbar from '../components/common/Navbar';
-import SearchBar from '../components/common/SearchBar';
 import MovieHero from '../components/movies/MovieHero';
 import MovieCard from '../components/movies/MovieCard';
 import MovieFilter from '../components/movies/MovieFilter';
@@ -9,7 +8,7 @@ import Footer from '../components/layout/Footer';
 import moviesData from '../../../data/movies.json';
 
 function Home() {
-    // charger tous les films et initialiser filteredMovies
+
     const [allMovies] = useState(moviesData || []);
     const [filteredMovies, setFilteredMovies] = useState(allMovies);
 
@@ -27,7 +26,18 @@ function Home() {
         <main className="bg-black min-h-screen text-white font-sans pt-20">
 
             {/* Fixed Navbar */}
-            <Navbar />
+            <Navbar movies={allMovies} onSearch={(q) => {
+                if (typeof q === 'string') {
+                    const qq = q.trim().toLowerCase();
+                    if (qq.length === 0) {
+                        setFilteredMovies(allMovies);
+                    } else {
+                        setFilteredMovies(allMovies.filter(m => (m.title || '').toLowerCase().includes(qq) || (m.description || '').toLowerCase().includes(qq)));
+                    }
+                } else if (q && q.title) {
+                    setFilteredMovies([q]);
+                }
+            }} />
 
             <div className="display flex w-full">
                 {featuredMovie && <MovieHero movie={featuredMovie} />}
@@ -37,8 +47,6 @@ function Home() {
                 <div className="container mx-auto px-4">
                     <MovieFilter movies={allMovies} onFilter={setFilteredMovies} />
                     <MovieList title="Films disponibles" movies={filteredMovies} />
-                </div>
-                <div className="-mt-32 relative z-10 space-y-8 pb-12">
                     <section className="py-8">
                         <div className="flex items-center justify-between px-4 mb-4">
                             <h2 className="text-2xl md:text-3xl font-bold">Tendances actuelles</h2>
