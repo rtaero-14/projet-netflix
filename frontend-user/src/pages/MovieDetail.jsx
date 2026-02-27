@@ -4,6 +4,7 @@ import moviesData from '../../../data/movies.json';
 import Button from '../components/common/Button';
 import Loading from '../components/common/Loading';
 import Navbar from '../components/common/Navbar';
+import BreadCrumb from '../components/common/BreadCrumb';
 import Footer from '../components/layout/Footer';
 
 function MovieDetail() {
@@ -63,15 +64,22 @@ function MovieDetail() {
           <div className="absolute left-0 right-0 bottom-16 z-20">
             <div className="container mx-auto px-4">
               <div className="max-w-3xl">
+                <BreadCrumb
+                  items={[
+                    { label: 'Films', path: '/' },
+                    { label: movie.genre },
+                    { label: movie.title },
+                  ]}
+                />
                 <h1 className="text-4xl md:text-6xl font-bold mb-2 text-white drop-shadow-lg leading-tight">{movie.title}</h1>
-                <div className="flex flex-wrap items-center gap-3 mt-2 mb-3">
+                <div className="flex flex-wrap items-center gap-3 mt-8 mb-6">
                   <span className="bg-primary px-3 py-1 rounded text-sm font-bold">{movie.rating}/10</span>
                   <span className="text-gray-300">{movie.year}</span>
                   <span className="text-gray-300">{movie.duration} min</span>
                   <span className="border border-gray-500 px-2 py-0.5 text-sm rounded">{movie.genre}</span>
                 </div>
 
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-2 mt-2">
                   <Button size="md" className="px-3 py-2" onClick={handleAddToCart}>
                     ▶ Louer {movie.price}€
                   </Button>
