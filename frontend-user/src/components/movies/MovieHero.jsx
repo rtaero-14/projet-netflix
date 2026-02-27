@@ -1,5 +1,18 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
+
 function MovieHero({ movie }) {
+ const [isLiked, setIsLiked] = useState(false);
+
+ const navigate = useNavigate();
+
+ const toggleLike = () => setIsLiked((s) => !s);
+
+ const handleMoreInfo = () => {
+	 if (movie && movie.id != null) navigate(`/movie/${movie.id}`);
+ };
+
  return (
  	<div className="relative h-[80vh] w-full">
  		{/* Background Image */}
@@ -31,19 +44,34 @@ function MovieHero({ movie }) {
 			<p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed drop-shadow-lg">
 				{movie.description}
 			</p>
- 			{/* Actions */}
-			{/* <div className="flex flex-col sm:flex-row gap-4">
-				<Button size="lg" className="shadow-2xl">
+			{/* Actions */}
+			<div className="flex flex-col sm:flex-row gap-4 items-center">
+				<Button
+					size="lg"
+					className="shadow-2xl"
+					onClick={() => window.dispatchEvent(new CustomEvent('add-to-cart', { detail: movie }))}
+				>
 					<svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-					<path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.51.5 0 000-2.538L6.3 2.84z" /></svg>
+						<path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.51.5 0 000-2.538L6.3 2.84z" />
+					</svg>
 					Louer pour {movie.price}€
 				</Button>
-				<Button variant="secondary" size="lg">
+
+				<Button variant="secondary" size="lg" onClick={handleMoreInfo}>
 					<svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
 					Plus d'infos
 				</Button>
-			</div> */}
+
+				{/* Like button in hero */}
+				<button
+					onClick={toggleLike}
+					className={`ml-2 inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-all cursor-pointer ${isLiked ? 'bg-red-600 text-white' : 'bg-white/10 text-white'}`}
+				>
+					{isLiked ? '♥ Aimé' : '♡ J\'aime'}
+				</button>
+			</div>
  		</div>
 	</div>
 </div>

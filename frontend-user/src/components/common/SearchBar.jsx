@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 
 function SearchBar({ movies = [], onSearch = () => {} }) {
-	
+
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 	const handleChange = (e) => {
@@ -47,7 +47,7 @@ function SearchBar({ movies = [], onSearch = () => {} }) {
 			{/*Bouton "Rechercher"*/}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				className="hover:text-gray-300 transition-colors"
+				className="hover:text-gray-300 transition-colors cursor-pointer"
 				aria-label="Ouvrir la recherche"
 			>
 				<svg
@@ -80,7 +80,7 @@ function SearchBar({ movies = [], onSearch = () => {} }) {
 							/>
 							<button
 								type="submit"
-								className="px-4 py-2 bg-primary text-white text-sm"
+								className="px-4 py-2 bg-primary text-white text-sm cursor-pointer"
 							>
 								Rechercher
 							</button>

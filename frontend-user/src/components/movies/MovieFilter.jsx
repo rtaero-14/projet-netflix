@@ -26,7 +26,7 @@ function MovieFilter({ movies = [], onFilter = () => {} }) {
 		<div className="flex flex-wrap gap-2 mb-6 px-4">
 			<button
 				onClick={() => handleGenreChange('all')}
-				className={`px-4 py-2 rounded-lg transition ${
+				className={`px-4 py-2 rounded-lg transition cursor-pointer ${
 					selectedGenre === 'all' ? 'bg-primary text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
 				}`}
 			>
@@ -38,7 +38,7 @@ function MovieFilter({ movies = [], onFilter = () => {} }) {
 				<button
 					key={g}
 					onClick={() => handleGenreChange(g)}
-					className={`px-4 py-2 rounded-lg transition ${
+					className={`px-4 py-2 rounded-lg transition cursor-pointer ${
 						selectedGenre === g ? 'bg-primary text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
 					}`}
 				>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import MovieDescription from './MovieDescription';
 
@@ -17,9 +18,16 @@ function MovieCard({ movie }) {
     'Horreur': 'bg-orange-500',
     'Thriller': 'bg-gray-500'
   };
+  const navigate = useNavigate();
   return (
   <>
-    <div className="group relative overflow-hidden rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105">
+    <div
+      className="group relative overflow-hidden rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105"
+      onClick={() => navigate(`/movie/${movie.id}`)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/movie/${movie.id}`); }}
+    >
             {/* Image */}
             <div className="relative aspect-[2/3]">
                 <img
@@ -56,7 +64,10 @@ function MovieCard({ movie }) {
                 <Button
                   size="sm"
                   className="flex-1"
-                  onClick={() => window.dispatchEvent(new CustomEvent('add-to-cart', { detail: movie }))}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent('add-to-cart', { detail: movie }));
+                  }}
                 >
                   ▶ Louer {movie.price}€
                 </Button>
@@ -64,17 +75,13 @@ function MovieCard({ movie }) {
                   variant="outline"
                   size="sm"
                   className={`text-xs ${isLiked ? 'bg-red-600 border-red-600 text-white' : ''}`}
-                  onClick={toggleLike}
+                  onClick={(e) => { e.stopPropagation(); toggleLike(); }}
                 >
                   {isLiked ? '♥ Aimé' : '♡ J\'aime'}
                 </Button>
               </div>
             </div>
-
-        {/* <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
     </div>
-
-  {/* (inline description is rendered inside the overlay) */}
     </>
   );
 }

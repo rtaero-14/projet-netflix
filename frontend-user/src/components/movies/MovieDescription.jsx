@@ -14,7 +14,7 @@ export default function MovieDescription({ description }) {
       <button
         type="button"
         onClick={toggle}
-        className="text-xs text-blue-400 hover:text-blue-300"
+        className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer"
       >
         {isExpanded ? 'Voir moins' : 'Voir plus'}
       </button>

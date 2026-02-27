@@ -1,5 +1,11 @@
 import React from 'react';
 import Home from './pages/Home';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MovieDetail from './pages/MovieDetail';
+import MyRentals from './pages/MyRentals';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import NotFound from './pages/NotFound';
 
 function App() {
 	return (

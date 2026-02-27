@@ -63,7 +63,7 @@ function CartButton() {
     <div className="relative" ref={wrapperRef}>
       <button
         onClick={toggleShow}
-        className="relative w-10 h-10 bg-primary rounded flex items-center justify-center text-white hover:opacity-90 transition"
+        className="relative w-10 h-10 bg-primary rounded flex items-center justify-center text-white hover:opacity-90 transition cursor-pointer"
         aria-label="Panier"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@ function CartButton() {
                           setConfirmPos({ top: rect.top + rect.height / 2, left: rect.right });
                           setConfirmRemoveId(item.id);
                         }}
-                        className="text-gray-300 hover:text-white bg-gray-700/30 px-2 py-1 rounded"
+                        className="text-gray-300 hover:text-white bg-gray-700/30 px-2 py-1 rounded cursor-pointer"
                         title="Supprimer"
                       >
                         ✕
@@ -138,7 +138,7 @@ function CartButton() {
                   setConfirmRemoveId(null);
                   setConfirmPos(null);
                 }}
-                className="px-3 py-1 bg-red-600 text-white text-sm rounded"
+                className="px-3 py-1 bg-red-600 text-white text-sm rounded cursor-pointer"
               >
                 Oui
               </button>
@@ -147,7 +147,7 @@ function CartButton() {
                   setConfirmRemoveId(null);
                   setConfirmPos(null);
                 }}
-                className="px-3 py-1 bg-gray-700 text-white text-sm rounded"
+                className="px-3 py-1 bg-gray-700 text-white text-sm rounded cursor-pointer"
               >
                 Non
               </button>
