@@ -1,8 +1,8 @@
 import React from 'react';
 
-function Footer() {
+function Footer({ className = '' }) {
 	return (
-		<footer className="bg-[#0b0b0b] text-gray-300 mt-16">
+		<footer className={`bg-[#0b0b0b] text-gray-300 mt-16 ${className}`}>
 			<div className="container mx-auto px-6 py-12">
 				<div className="grid grid-cols-1 md:grid-cols-4 gap-8">
 					<div>

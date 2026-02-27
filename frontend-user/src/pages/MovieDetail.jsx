@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import moviesData from '../../../data/movies.json';
 import Button from '../components/common/Button';
 import Loading from '../components/common/Loading';
@@ -9,6 +9,7 @@ import Footer from '../components/layout/Footer';
 function MovieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const movie = (moviesData || []).find((m) => String(m.id) === String(id));
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,16 @@ function MovieDetail() {
     );
   }
 
+  const handleAddToCart = () => {
+    const isAuthenticated = localStorage.getItem('user') !== null;
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent('add-to-cart', { detail: movie }));
+  };
+
   return (
     <>
       <Navbar movies={moviesData} onSearch={() => {}} />
@@ -61,7 +72,7 @@ function MovieDetail() {
                 </div>
 
                 <div className="flex items-center gap-3 mb-2">
-                  <Button size="md" className="px-3 py-2" onClick={() => window.dispatchEvent(new CustomEvent('add-to-cart', { detail: movie }))}>
+                  <Button size="md" className="px-3 py-2" onClick={handleAddToCart}>
                     ▶ Louer {movie.price}€
                   </Button>
                   <button

@@ -17,7 +17,7 @@ function Navbar({ movies = [], onSearch = () => {} }) {
                 <div className="flex items-center justify-between">
                     {/*Logo*/}
                     <div className="flex items-center space-x-8">
-                        <h1 className="text-primary text-3xl font-bold tracking-tight">ASSURANCE-TOURIX</h1>
+                        <h1 className="text-primary text-3xl font-bold tracking-tight">ASTÉRIX</h1>
 
                         {/*Liens de navigation*/}
                         <ul className="hidden md:flex space-x-6">

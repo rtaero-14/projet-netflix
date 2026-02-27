@@ -1,17 +1,44 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+const CART_STORAGE_KEY = 'netflix_cart';
+const RENTALS_STORAGE_KEY = 'netflix_rentals_by_user';
+
+const readJson = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 function CartButton() {
-  const [cartItems, setCartItems] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [cartItems, setCartItems] = useState(() => readJson(CART_STORAGE_KEY, []));
   const [show, setShow] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
   const [confirmPos, setConfirmPos] = useState(null);
+  const [paymentError, setPaymentError] = useState('');
 
   const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  }, [cartItems]);
 
   useEffect(() => {
     const onAdd = (e) => {
       const movie = e?.detail;
       if (!movie) return;
+
+      const user = readJson('user', null);
+      if (!user?.email) {
+        navigate('/login', { state: { from: location } });
+        return;
+      }
+
       setCartItems((prev) => {
         const existing = prev.find((i) => i.id === movie.id);
         if (existing) {
@@ -34,7 +61,7 @@ function CartButton() {
       window.removeEventListener('add-to-cart', onAdd);
       window.removeEventListener('remove-from-cart', onRemove);
     };
-  }, []);
+  }, [location, navigate]);
 
   useEffect(() => {
     const onDocClick = (e) => {
@@ -58,6 +85,38 @@ function CartButton() {
   const toggleShow = () => setShow((s) => !s);
 
   const cartCount = useMemo(() => cartItems.reduce((s, i) => s + (i.qty || 1), 0), [cartItems]);
+  const total = useMemo(() => cartItems.reduce((sum, i) => sum + ((i.qty || 1) * (i.price || 0)), 0), [cartItems]);
+
+  const handlePay = () => {
+    setPaymentError('');
+    if (cartItems.length === 0) return;
+
+    const user = readJson('user', null);
+    if (!user?.email) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
+    const rentalsByUser = readJson(RENTALS_STORAGE_KEY, {});
+    const existingRentals = Array.isArray(rentalsByUser[user.email]) ? rentalsByUser[user.email] : [];
+    const existingIds = new Set(existingRentals.map((r) => r.id));
+
+    const newlyPaidRentals = cartItems
+      .filter((item) => !existingIds.has(item.id))
+      .map((item) => ({ ...item, rentedAt: new Date().toISOString() }));
+
+    if (newlyPaidRentals.length === 0) {
+      setPaymentError('Ces films sont déjà dans vos locations.');
+      return;
+    }
+
+    rentalsByUser[user.email] = [...existingRentals, ...newlyPaidRentals];
+    localStorage.setItem(RENTALS_STORAGE_KEY, JSON.stringify(rentalsByUser));
+    setCartItems([]);
+    setShow(false);
+    window.dispatchEvent(new Event('rentals-updated'));
+    navigate('/my-rentals');
+  };
 
   return (
     <div className="relative" ref={wrapperRef}>
@@ -82,45 +141,60 @@ function CartButton() {
           {cartItems.length === 0 ? (
             <div className="text-sm text-gray-400">Votre panier est vide</div>
           ) : (
-            <ul className="space-y-2 max-h-64 overflow-auto">
-              {cartItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex justify-between items-center p-2 bg-gray-800 rounded"
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={item.poster || item.backdrop || ''}
-                      alt={item.title}
-                      className="w-12 h-16 object-cover rounded"
-                      loading="lazy"
-                    />
-                    <div>
-                      <div className="text-white font-semibold">{item.title}</div>
-                      <div className="text-xs text-gray-400">{item.qty} × {item.price}€</div>
+            <>
+              <ul className="space-y-2 max-h-64 overflow-auto">
+                {cartItems.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex justify-between items-center p-2 bg-gray-800 rounded"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={item.poster || item.backdrop || ''}
+                        alt={item.title}
+                        className="w-12 h-16 object-cover rounded"
+                        loading="lazy"
+                      />
+                      <div>
+                        <div className="text-white font-semibold">{item.title}</div>
+                        <div className="text-xs text-gray-400">{item.qty} × {item.price}€</div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="text-white font-bold">{(item.qty * (item.price || 0)).toFixed(2)}€</div>
-                    
-                    {confirmRemoveId === item.id ? null : (
-                      <button
-                        onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setConfirmPos({ top: rect.top + rect.height / 2, left: rect.right });
-                          setConfirmRemoveId(item.id);
-                        }}
-                        className="text-gray-300 hover:text-white bg-gray-700/30 px-2 py-1 rounded cursor-pointer"
-                        title="Supprimer"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    <div className="flex items-center gap-3">
+                      <div className="text-white font-bold">{(item.qty * (item.price || 0)).toFixed(2)}€</div>
+
+                      {confirmRemoveId === item.id ? null : (
+                        <button
+                          onClick={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setConfirmPos({ top: rect.top + rect.height / 2, left: rect.right });
+                            setConfirmRemoveId(item.id);
+                          }}
+                          className="text-gray-300 hover:text-white bg-gray-700/30 px-2 py-1 rounded cursor-pointer"
+                          title="Supprimer"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 pt-3 border-t border-gray-700">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-300">Total</span>
+                  <span className="text-white font-bold">{total.toFixed(2)}€</span>
+                </div>
+                {paymentError && <div className="text-xs text-red-500 mb-2">{paymentError}</div>}
+                <button
+                  onClick={handlePay}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded cursor-pointer"
+                >
+                  Payer
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}

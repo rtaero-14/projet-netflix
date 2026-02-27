@@ -78,7 +78,7 @@ export default function Register() {
         <div className="w-full max-w-md mx-4">
           <div className="bg-black border border-gray-800 rounded-lg p-8 shadow-lg">
             <div className="text-center mb-6">
-              <div className="text-3xl font-extrabold text-red-600">ASSURANCE-TOURIX</div>
+              <div className="text-3xl font-extrabold text-red-600">ASTÉRIX</div>
             </div>
 
             <h2 className="text-xl font-semibold mb-4">S'inscrire</h2>
