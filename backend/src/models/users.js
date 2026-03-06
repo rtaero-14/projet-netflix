@@ -30,6 +30,45 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: function () {}
+    default: function () {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.name)}&background=e50914&color=fff`;
+    }
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true // Ajoute createdAt et updatedAt automatiquement
+});
+
+// INDEX pour améliorer les performances
+// userSchema.index({ email: 1 }); // L'index sur email est déjà créé automatiquement grâce à unique: true
+
+// MIDDLEWARE pre-save: Hasher le mot de passe avant sauvegarde
+userSchema.pre('save', async function () {
+  // Ne hasher que si le password a été modifié
+  if (this.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
   }
 });
+
+// MÉTHODE pour comparer les mots de passe
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// MÉTHODE pour obtenir les infos publiques (sans password)
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
+
+// MÉTHODE statique pour trouver par email
+userSchema.statics.findByEmail = function (email) {
+  return this.findOne({ email: email.toLowerCase() });
+};
+const User = mongoose.model('User', userSchema);
+export default User;
