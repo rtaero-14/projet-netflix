@@ -1,17 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import CartButton from './CartButton';
 
-function Navbar({ movies = [], onSearch = () => {} }) {
-    const [isScrolled, _setIsScrolled] = useState(false);
+function Navbar({ movies = [], onSearch = () => {}, transparentWhenScrolled = false }) {
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => setIsScrolled(window.scrollY > 20);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    const navBackground = transparentWhenScrolled
+        ? (isScrolled ? 'bg-transparent' : 'bg-black/70')
+        : (isScrolled ? 'bg-black' : 'bg-linear-to-b from-black/80 to-transparent');
+
     return (
         <nav
-            className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
-                isScrolled
-                    ? 'bg-black'
-                    : 'bg-linear-to-b from-black/80 to-transparent'
-            }`}
+            className={`fixed top-0 w-full z-50 transition-colors duration-300 ${navBackground}`}
         >
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
@@ -27,7 +35,7 @@ function Navbar({ movies = [], onSearch = () => {} }) {
                                 </NavLink>
                             </li>
                             <li>
-                                <NavLink to="/movies" className={({ isActive }) => isActive ? 'text-primary font-bold' : 'text-gray-300 hover:text-white' }>
+                                <NavLink to="/search" className={({ isActive }) => isActive ? 'text-primary font-bold' : 'text-gray-300 hover:text-white' }>
                                     Films
                                 </NavLink>
                             </li>

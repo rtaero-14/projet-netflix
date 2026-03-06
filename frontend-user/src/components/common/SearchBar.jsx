@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function SearchBar({ movies = [], onSearch = () => {} }) {
+	const navigate = useNavigate();
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -11,8 +13,9 @@ function SearchBar({ movies = [], onSearch = () => {} }) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log('Recherche (submit):', searchTerm);
 		onSearch(searchTerm);
+		navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+		setIsOpen(false);
 	};
 
 	const containerRef = useRef(null);
@@ -98,6 +101,7 @@ function SearchBar({ movies = [], onSearch = () => {} }) {
 											setSearchTerm(m.title);
 											setIsOpen(false);
 											onSearch(m);
+											navigate(`/search?q=${encodeURIComponent(m.title)}`);
 										}}
 									>
 										{/*Miniature du film dans les suggestions*/}

@@ -53,7 +53,7 @@ function MovieDetail() {
 
   return (
     <>
-      <Navbar movies={moviesData} onSearch={() => {}} />
+      <Navbar movies={moviesData} onSearch={() => {}} transparentWhenScrolled />
       <main className="min-h-screen bg-black text-white pt-20">
         <div
           className="relative h-[60vh] w-full bg-black bg-cover bg-center bg-no-repeat"
@@ -66,7 +66,7 @@ function MovieDetail() {
               <div className="max-w-3xl">
                 <BreadCrumb
                   items={[
-                    { label: 'Films', path: '/' },
+                    { label: 'Films', path: '/search' },
                     { label: movie.genre },
                     { label: movie.title },
                   ]}
