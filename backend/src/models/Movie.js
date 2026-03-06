@@ -81,7 +81,7 @@ const movieSchema = new mongoose.Schema(
       default: 3.99,
       validate: {
         validator: function (v) {
-          return /^d+(\.\d{1,2})?$/.test(v.toString());
+          return /^\d+(\.\d{1,2})?$/.test(v.toString());
         },
         message: "Le prix doit avoir au maximum 2 décimales",
       },
