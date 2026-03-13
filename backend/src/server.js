@@ -53,6 +53,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Importer de la route
+import movieRoutes from './routes/movie.routes.js';
+// Utilisation de la Routes API
+app.use('/api/movies', movieRoutes);
+
 // TODO: Importer et utiliser les routes - Prochaine séance si vous n'êtes pas trop lent 😉
 // import movieRoutes from './routes/movie.routes.js';
 // import authRoutes from './routes/auth.routes.js';
