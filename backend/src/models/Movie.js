@@ -38,9 +38,9 @@ const movieSchema = new mongoose.Schema(
       required: [true, "Le genre est requis"],
       validate: {
         validator: function (v) {
-          return v && v.length > 0;
+          return Array.isArray(v) && v.length > 0 && v.length <= 5;
         },
-        message: "La liste des genres ne peut pas être vide.",
+        message: "Un film doit avoir entre 1 et 5 genres.",
       },
       enum: {
         values: [
@@ -66,12 +66,13 @@ const movieSchema = new mongoose.Schema(
     duration: {
       type: Number,
       required: [true, "La durée est requise"],
-      min: [1, "La durée doit être positive"],
+      min: [1, "La durée doit être comprise entre 1 et 500 minutes"],
+      max: [500, "La durée doit être comprise entre 1 et 500 minutes"],
       validate: {
         validator: function (v) {
-          return v > 0 && v <= 500;
+          return Number.isInteger(v);
         },
-        message: "La durée doit être entre 1 et 500 minutes",
+        message: "La durée doit être un nombre entier de minutes",
       },
     },
     price: {
@@ -81,9 +82,9 @@ const movieSchema = new mongoose.Schema(
       default: 3.99,
       validate: {
         validator: function (v) {
-          return /^\d+(\.\d{1,2})?$/.test(v.toString());
+          return /^\d+(\.\d{2})$/.test(v.toString());
         },
-        message: "Le prix doit avoir au maximum 2 décimales",
+        message: "Le prix doit contenir exactement 2 décimales",
       },
     },
     rating: {
