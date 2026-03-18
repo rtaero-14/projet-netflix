@@ -40,8 +40,27 @@ export const getMovieStats = async (req, res, next) => {
 };
 
 export const createMovie = async (req, res, next) => {
-    console.log("createMovie");
-    res.status(200).json({success: true, message: `Création d'un film via un formulaire`});
+    const title = req.body.title;
+    const description = req.body.description;
+    const poster = req.body.poster;
+    const backdrop = req.body.backdrop;
+    const genre = req.body.genre;
+    const year = req.body.year;
+    const duration = req.body.duration;
+    const price = req.body.price;
+    const rating = req.body.rating;
+
+    const movie = await Movie.create({
+        title,
+        description,
+        poster,
+        backdrop,
+        genre,
+        year,
+        duration,
+        price,
+        rating
+    })
 };
 
 export const updateMovie = async (req, res, next) => {
