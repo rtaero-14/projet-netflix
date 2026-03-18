@@ -64,8 +64,15 @@ export const createMovie = async (req, res, next) => {
 };
 
 export const updateMovie = async (req, res, next) => {
-    console.log("updateMovie");
-    res.status(200).json({success : true, message: `Mise à jour des données du films dont l’id est ${req.params.id}, via un formulaire`});
+    const updatedMovie = await Movie.findByIdAndUpdate(
+        req.body.id,
+        req.body,
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+    res.json({success: true})
 };
 
 export const deleteMovie = async (req, res, next) => {
