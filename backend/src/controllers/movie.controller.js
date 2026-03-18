@@ -86,7 +86,11 @@ export const updateMovie = async (req, res, next) => {
 };
 
 export const deleteMovie = async (req, res, next) => {
-    
+    try {
+
+    } catch {
+        res.status(404).json({message: "Film avec cet ID introuvable, suppression impossible !"})
+    }
 };
 
 export const getSimilarMovies = async (req, res, next) => {
