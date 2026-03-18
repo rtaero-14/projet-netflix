@@ -1,14 +1,14 @@
 import express from 'express';
 import {
- getAllMovies,
- getMovieById,
- createMovie,
- updateMovie,
- deleteMovie,
- getMovieStats,
- getSimilarMovies
+    getAllMovies,
+    getMovieById,
+    createMovie,
+    updateMovie,
+    deleteMovie,
+    getMovieStats,
+    getSimilarMovies
 } from '../controllers/movie.controller.js';
-// import { protect, admin } from '../middleware/auth.middleware.js'; // Séance 9
+
 const router = express.Router();
 // Routes publiques
 router.get('/', getAllMovies);
