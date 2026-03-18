@@ -50,34 +50,43 @@ export const createMovie = async (req, res, next) => {
     const price = req.body.price;
     const rating = req.body.rating;
 
-    const movie = await Movie.create({
-        title,
-        description,
-        poster,
-        backdrop,
-        genre,
-        year,
-        duration,
-        price,
-        rating
-    })
+    try{
+        const movie = await Movie.create({
+            title,
+            description,
+            poster,
+            backdrop,
+            genre,
+            year,
+            duration,
+            price,
+            rating
+        })
+        res.json({success: true, message: `Film avec l'id ${movie._id} créé !`})
+    } catch {
+        res.status(404).json({message: "Création de film impossible !"})
+    }
+    
 };
 
 export const updateMovie = async (req, res, next) => {
-    const updatedMovie = await Movie.findByIdAndUpdate(
-        req.body.id,
-        req.body,
-        {
-            new: true,
-            runValidators: true
-        }
-    );
-    res.json({success: true})
+    try {
+        const updatedMovie = await Movie.findByIdAndUpdate(
+            req.body.id,
+            req.body,
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+        res.json({success: true, message: "Données modifiées !"})
+    } catch {
+        res.status(404).json({message: "ID invalide !"})
+    }
 };
 
 export const deleteMovie = async (req, res, next) => {
-    console.log("deleteMovie");
-    res.status(200).json({success : true, message: `Suppression du film dont l'ID est ${req.params.id}`});
+    
 };
 
 export const getSimilarMovies = async (req, res, next) => {
