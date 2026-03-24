@@ -12,15 +12,17 @@ import {
 const router = express.Router();
 // Routes publiques
 router.get('/', getAllMovies);
-router.get('/stats', getMovieStats); // TODO: Protéger avec admin (séance 9)
+router.get('/stats', getMovieStats);
 router.get('/:id', getMovieById);
 router.get('/:id/similar', getSimilarMovies);
+router.post('/', createMovie);
+router.put('/:id', updateMovie);
+router.delete('/:id', deleteMovie);
+
 // Routes protégées admin (sera activé séance 9)
 // router.post('/', protect, admin, createMovie);
 // router.put('/:id', protect, admin, updateMovie);
 // router.delete('/:id', protect, admin, deleteMovie);
 // Routes temporaires sans authentification (pour tester)
-router.post('/', createMovie);
-router.put('/:id', updateMovie);
-router.delete('/:id', deleteMovie);
+
 export default router;
