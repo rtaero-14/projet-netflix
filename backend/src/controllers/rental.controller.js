@@ -7,9 +7,48 @@ import User from "../models/User.js";
 // @access  Private
 export const createRental = async (req, res, next) => {
     try {
-        
-    } catch {
+        const { user, movie } = req.body;
 
+        const existingUser = await User.findById(user);
+        if (!existingUser) {
+            return res.status(404).json({ message: "Utilisateur introuvable !" });
+        }
+
+        const existingMovie = await Movie.findById(movie);
+        if (!existingMovie) {
+            return res.status(404).json({ message: "Film introuvable !" });
+        }
+
+        if (!existingMovie.isAvailable) {
+            return res.status(400).json({ message: "Ce film n'est pas disponible à la location !" });
+        }
+
+        const activeRental = await Rental.findOne({
+            user,
+            movie,
+            status: 'active',
+            expiryDate: { $gt: new Date() }
+        });
+
+        if (activeRental) {
+            return res.status(400).json({ message: "Ce film est deja loue par cet utilisateur !" });
+        }
+
+        const rental = await Rental.create({
+            user,
+            movie,
+            price: existingMovie.price
+        });
+
+        await existingMovie.incrementRentalCount();
+
+        res.status(201).json({
+            success: true,
+            message: "Location creee !",
+            rental
+        });
+    } catch {
+        res.status(400).json({ message: "Creation de la location impossible !" });
     }
 };
 

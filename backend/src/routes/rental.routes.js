@@ -10,8 +10,8 @@ import {
 
 const router = express.Router();
 
-routes.get('/', getAllRentals);
-routes.get('/my-rentals', getMyRentals);
-routes.get('/stats', getRentalStats);
-routes.post('/', createRental);
-routes.delete('/:id', cancelRental)
+router.get('/', getAllRentals);
+router.get('/my-rentals', getMyRentals);
+router.get('/stats', getRentalStats);
+router.post('/', createRental);
+router.delete('/:id', cancelRental)
