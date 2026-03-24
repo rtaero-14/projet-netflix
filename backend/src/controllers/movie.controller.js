@@ -87,13 +87,34 @@ export const updateMovie = async (req, res, next) => {
 
 export const deleteMovie = async (req, res, next) => {
     try {
+        const deletedMovie = await Movie.deleteOne({ _id: req.params.id });
 
+        if (deletedMovie.deletedCount === 0) {
+            return res.status(404).json({message: "Film avec cet ID introuvable, suppression impossible !"});
+        }
+
+        res.status(200).json({success: true, message: "Film supprimé !"});
     } catch {
         res.status(404).json({message: "Film avec cet ID introuvable, suppression impossible !"})
     }
 };
 
+
 export const getSimilarMovies = async (req, res, next) => {
-    console.log("getSimilarMovies");
-    res.status(200).json({success : true, message: `les films qui ont le même genre que le film dont l’id est  ${req.params.id}`});
+    try {
+        const movie = await Movie.findById(req.params.id);
+
+        if (!movie) {
+            return res.status(404).json({message: "Film introuvable !"});
+        }
+
+        const similarMovies = await Movie.find({
+            _id: { $ne: movie._id },
+            genre: { $in: movie.genre }
+        });
+
+        res.status(200).json({success: true, movies: similarMovies});
+    } catch {
+        res.status(404).json({message: "Film avec cet ID invalide ou film introuvable !"});
+    }
 }
