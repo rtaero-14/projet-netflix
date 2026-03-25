@@ -170,3 +170,79 @@ export const getRentalStats = async (req, res, next) => {
         next(error);
     }
 };
+
+// @desc    Obtenir des recommandations personnalisées
+// @route   GET /api/rentals/recommendations
+// @access  Private
+export const getRecommendations = async (req, res, next) => {
+    try {
+        const userId = req.query.userId;
+
+        if (!userId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Veuillez fournir un userId dans l'URL pour tester (?userId=TON_ID)" 
+            });
+        }
+        const userRentals = await Rental.find({ user: userId }).populate('movie');
+
+        //Si l'utilisateur n'a aucune location, recommander films plus populaires
+        if (!userRentals || userRentals.length === 0) {
+            const popularMovies = await Movie.getPopularMovies(5); 
+            return res.status(200).json({
+                success: true,
+                message: "Pas d'historique. Voici les films les plus populaires.",
+                recommendations: popularMovies
+            });
+        }
+
+        const rentedMovieIds = userRentals.map(rental => rental.movie._id);
+
+        //Compter et trier les genres préférés
+        const genreCounts = {};
+        
+        userRentals.forEach(rental => {
+            if (rental.movie && rental.movie.genre) {
+                rental.movie.genre.forEach(g => {
+                    genreCounts[g] = (genreCounts[g] || 0) + 1;
+                });
+            }
+        });
+
+        const topGenres = Object.entries(genreCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)                 
+            .map(entry => entry[0]);
+
+        //Recommandations des films de ces genres non loués
+        const recommendations = await Movie.find({
+            genre: { $in: topGenres },
+            _id: { $nin: rentedMovieIds },
+            isAvailable: true
+        })
+        .sort({ rating: -1, rentalCount: -1 })
+        .limit(5);
+
+        if (recommendations.length === 0) {
+             const popularMovies = await Movie.find({
+                 _id: { $nin: rentedMovieIds },
+                 isAvailable: true
+             }).sort({ rentalCount: -1 }).limit(5);
+
+             return res.status(200).json({
+                 success: true,
+                 message: "Recommandations basées sur la popularité générale.",
+                 recommendations: popularMovies
+             });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Recommandations basées sur vos genres favoris : ${topGenres.join(', ')}`,
+            recommendations
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
