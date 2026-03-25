@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
+import { CartProvider } from './context/CartContext'; // <-- L'import
 import Home from './pages/Home';
 import MovieDetail from './pages/MovieDetail';
 import MyRentals from './pages/MyRentals';
@@ -13,26 +14,28 @@ import Search from './pages/Search';
 function App() {
 	return (
 		<AuthProvider>
-			<BrowserRouter>
-				<Routes>
-					<Route path="/" element={<Home />} />
-					<Route path="/movie/:id" element={<MovieDetail />} />
-					<Route path="/login" element={<Login />} />
-					<Route path="/register" element={<Register />} />
-					<Route path="/search" element={<Search />} />
+			<CartProvider> {/* <-- Ajout du Provider ici */}
+				<BrowserRouter>
+					<Routes>
+						<Route path="/" element={<Home />} />
+						<Route path="/movie/:id" element={<MovieDetail />} />
+						<Route path="/login" element={<Login />} />
+						<Route path="/register" element={<Register />} />
+						<Route path="/search" element={<Search />} />
 
-					<Route 
-						path="/my-rentals" 
-						element={
-							<ProtectedRoute>
-								<MyRentals />
-							</ProtectedRoute>
-						} 
-					/>
+						<Route 
+							path="/my-rentals" 
+							element={
+								<ProtectedRoute>
+									<MyRentals />
+								</ProtectedRoute>
+							} 
+						/>
 
-					<Route path="*" element={<NotFound />} />
-				</Routes>
-			</BrowserRouter>
+						<Route path="*" element={<NotFound />} />
+					</Routes>
+				</BrowserRouter>
+			</CartProvider>
 		</AuthProvider>
 	);
 }

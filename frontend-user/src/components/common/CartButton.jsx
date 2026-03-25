@@ -1,67 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-const CART_STORAGE_KEY = 'netflix_cart';
-const RENTALS_STORAGE_KEY = 'netflix_rentals_by_user';
-
-const readJson = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-};
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthProvider';
 
 function CartButton() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [cartItems, setCartItems] = useState(() => readJson(CART_STORAGE_KEY, []));
+
+  const { cart, removeFromCart, getCartTotal, getCartCount, rentAllInCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  
   const [show, setShow] = useState(false);
-  const [confirmRemoveId, setConfirmRemoveId] = useState(null);
-  const [confirmPos, setConfirmPos] = useState(null);
-  const [paymentError, setPaymentError] = useState('');
-
   const wrapperRef = useRef(null);
-
-  useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  useEffect(() => {
-    const onAdd = (e) => {
-      const movie = e?.detail;
-      if (!movie) return;
-
-      const user = readJson('user', null);
-      if (!user?.email) {
-        navigate('/login', { state: { from: location } });
-        return;
-      }
-
-      setCartItems((prev) => {
-        const existing = prev.find((i) => i.id === movie.id);
-        if (existing) {
-          return prev; //On ne peut louer qu'une seule fois le film
-        }
-        return [...prev, { ...movie, qty: 1 }];
-      });
-      setShow(true);
-    };
-
-    const onRemove = (e) => {
-      const id = e?.detail;
-      if (!id) return;
-      setCartItems((prev) => prev.filter((i) => i.id !== id));
-    };
-
-    window.addEventListener('add-to-cart', onAdd);
-    window.addEventListener('remove-from-cart', onRemove);
-    return () => {
-      window.removeEventListener('add-to-cart', onAdd);
-      window.removeEventListener('remove-from-cart', onRemove);
-    };
-  }, [location, navigate]);
 
   useEffect(() => {
     const onDocClick = (e) => {
@@ -81,40 +31,20 @@ function CartButton() {
     };
   }, [show]);
 
-  const removeFromCart = (id) => setCartItems((prev) => prev.filter((i) => i.id !== id));
   const toggleShow = () => setShow((s) => !s);
 
-  const cartCount = useMemo(() => cartItems.reduce((s, i) => s + (i.qty || 1), 0), [cartItems]);
-  const total = useMemo(() => cartItems.reduce((sum, i) => sum + ((i.qty || 1) * (i.price || 0)), 0), [cartItems]);
-
   const handlePay = () => {
-    setPaymentError('');
-    if (cartItems.length === 0) return;
+    if (cart.length === 0) return;
 
-    const user = readJson('user', null);
-    if (!user?.email) {
+
+    if (!isAuthenticated()) {
       navigate('/login', { state: { from: location } });
+      setShow(false);
       return;
     }
 
-    const rentalsByUser = readJson(RENTALS_STORAGE_KEY, {});
-    const existingRentals = Array.isArray(rentalsByUser[user.email]) ? rentalsByUser[user.email] : [];
-    const existingIds = new Set(existingRentals.map((r) => r.id));
-
-    const newlyPaidRentals = cartItems
-      .filter((item) => !existingIds.has(item.id))
-      .map((item) => ({ ...item, rentedAt: new Date().toISOString() }));
-
-    if (newlyPaidRentals.length === 0) {
-      setPaymentError('Ces films sont déjà dans vos locations.');
-      return;
-    }
-
-    rentalsByUser[user.email] = [...existingRentals, ...newlyPaidRentals];
-    localStorage.setItem(RENTALS_STORAGE_KEY, JSON.stringify(rentalsByUser));
-    setCartItems([]);
+    rentAllInCart();
     setShow(false);
-    window.dispatchEvent(new Event('rentals-updated'));
     navigate('/my-rentals');
   };
 
@@ -128,9 +58,10 @@ function CartButton() {
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
-        {cartCount > 0 && (
+        {/* On affiche le compteur seulement s'il est > 0 */}
+        {getCartCount() > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">
-            {cartCount}
+            {getCartCount()}
           </span>
         )}
       </button>
@@ -138,12 +69,12 @@ function CartButton() {
       {show && (
         <div className="absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-lg p-3 z-50">
           <h4 className="text-sm font-semibold text-white mb-2">Panier</h4>
-          {cartItems.length === 0 ? (
+          {cart.length === 0 ? (
             <div className="text-sm text-gray-400">Votre panier est vide</div>
           ) : (
             <>
               <ul className="space-y-2 max-h-64 overflow-auto">
-                {cartItems.map((item) => (
+                {cart.map((item) => (
                   <li
                     key={item.id}
                     className="flex justify-between items-center p-2 bg-gray-800 rounded"
@@ -156,77 +87,35 @@ function CartButton() {
                         loading="lazy"
                       />
                       <div>
-                        <div className="text-white font-semibold">{item.title}</div>
-                        <div className="text-xs text-gray-400">{item.qty} × {item.price}€</div>
+                        <div className="text-white font-semibold text-sm">{item.title}</div>
+                        <div className="text-xs text-gray-400">{item.price}€</div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="text-white font-bold">{(item.qty * (item.price || 0)).toFixed(2)}€</div>
-
-                      {confirmRemoveId === item.id ? null : (
-                        <button
-                          onClick={(e) => {
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            setConfirmPos({ top: rect.top + rect.height / 2, left: rect.right });
-                            setConfirmRemoveId(item.id);
-                          }}
-                          className="text-gray-300 hover:text-white bg-gray-700/30 px-2 py-1 rounded cursor-pointer"
-                          title="Supprimer"
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
+                    <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-gray-300 hover:text-red-500 bg-gray-700/30 px-2 py-1 rounded cursor-pointer transition-colors"
+                        title="Supprimer"
+                    >
+                        ✕
+                    </button>
                   </li>
                 ))}
               </ul>
               <div className="mt-3 pt-3 border-t border-gray-700">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-300">Total</span>
-                  <span className="text-white font-bold">{total.toFixed(2)}€</span>
+                  <span className="text-white font-bold">{getCartTotal().toFixed(2)}€</span>
                 </div>
-                {paymentError && <div className="text-xs text-red-500 mb-2">{paymentError}</div>}
                 <button
                   onClick={handlePay}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded cursor-pointer"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded cursor-pointer transition-colors"
                 >
                   Payer
                 </button>
               </div>
             </>
           )}
-        </div>
-      )}
-
-      {confirmRemoveId && confirmPos && (
-        <div
-          style={{ position: 'fixed', top: confirmPos.top - 10, left: confirmPos.left + 8, zIndex: 60 }}
-        >
-          <div className="bg-gray-900 border border-gray-700 rounded-md p-2 shadow-lg">
-            <div className="text-sm text-gray-200 mb-2">Êtes-vous sûr de vouloir retirer ce film du panier ?</div>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => {
-                  removeFromCart(confirmRemoveId);
-                  setConfirmRemoveId(null);
-                  setConfirmPos(null);
-                }}
-                className="px-3 py-1 bg-red-600 text-white text-sm rounded cursor-pointer"
-              >
-                Oui
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmRemoveId(null);
-                  setConfirmPos(null);
-                }}
-                className="px-3 py-1 bg-gray-700 text-white text-sm rounded cursor-pointer"
-              >
-                Non
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
