@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/database.js';
 import mongoose from 'mongoose';
+import movieRoutes from './routes/movie.routes.js';
+import rentalRoutes from './routes/rental.routes.js';
+import authRoutes from './routes/auth.routes.js';
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -22,6 +25,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/api/movies', movieRoutes);
+app.use('/api/rentals', rentalRoutes);
+app.use('/api/auth', authRoutes);
 
 // Logger simple pour le développement
 if (process.env.NODE_ENV === 'development') {
