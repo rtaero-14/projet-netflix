@@ -58,13 +58,8 @@ import movieRoutes from './routes/movie.routes.js';
 // Utilisation de la Routes API
 app.use('/api/movies', movieRoutes);
 
-// TODO: Importer et utiliser les routes - Prochaine séance si vous n'êtes pas trop lent 😉
-// import movieRoutes from './routes/movie.routes.js';
-// import authRoutes from './routes/auth.routes.js';
-// import rentalRoutes from './routes/rental.routes.js';
-// app.use('/api/movies', movieRoutes);
-// app.use('/api/auth', authRoutes);
-// app.use('/api/rentals', rentalRoutes);
+import rentalRoutes from './routes/rental.routes.js';
+app.use('/api/rentals', rentalRoutes);
 
 // Gestion des erreurs 404
 app.use((req, res) => {

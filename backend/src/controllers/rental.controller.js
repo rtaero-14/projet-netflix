@@ -11,16 +11,16 @@ export const createRental = async (req, res, next) => {
 
         const existingUser = await User.findById(user);
         if (!existingUser) {
-            return res.status(404).json({ message: "Utilisateur introuvable !" });
+            return res.status(404).json({ success: false, message: "Utilisateur introuvable !" });
         }
 
         const existingMovie = await Movie.findById(movie);
         if (!existingMovie) {
-            return res.status(404).json({ message: "Film introuvable !" });
+            return res.status(404).json({ success: false, message: "Film introuvable !" });
         }
 
         if (!existingMovie.isAvailable) {
-            return res.status(400).json({ message: "Ce film n'est pas disponible à la location !" });
+            return res.status(400).json({ success: false, message: "Ce film n'est pas disponible à la location !" });
         }
 
         const activeRental = await Rental.findOne({
@@ -31,7 +31,7 @@ export const createRental = async (req, res, next) => {
         });
 
         if (activeRental) {
-            return res.status(400).json({ message: "Ce film est deja loue par cet utilisateur !" });
+            return res.status(400).json({ success: false, message: "Ce film est déjà loué par cet utilisateur !" });
         }
 
         const rental = await Rental.create({
@@ -42,13 +42,15 @@ export const createRental = async (req, res, next) => {
 
         await existingMovie.incrementRentalCount();
 
+        await rental.populate('movie', 'title poster durationFormatted');
+
         res.status(201).json({
             success: true,
-            message: "Location creee !",
+            message: "Location créée avec succès !",
             rental
         });
-    } catch {
-        res.status(400).json({ message: "Creation de la location impossible !" });
+    } catch (error) {
+        next(error); 
     }
 };
 
@@ -57,9 +59,27 @@ export const createRental = async (req, res, next) => {
 // @access  Private
 export const getMyRentals = async (req, res, next) => {
     try {
+        const userId = req.query.userId;
 
-    } catch {
+        if (!userId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Veuillez fournir un userId dans l'URL pour tester (?userId=TON_ID)" 
+            });
+        }
         
+        const activeRentals = await Rental.getActiveRentals(userId);
+        const expiredRentals = await Rental.getExpiredRentals(userId);
+
+        res.status(200).json({
+            success: true,
+            activeCount: activeRentals.length,
+            expiredCount: expiredRentals.length,
+            activeRentals,
+            expiredRentals
+        });
+    } catch (error) {
+        next(error);
     }
 };
 
@@ -68,9 +88,18 @@ export const getMyRentals = async (req, res, next) => {
 // @access  Private/Admin
 export const getAllRentals = async (req, res, next) => {
     try {
+        const rentals = await Rental.find()
+            .populate('user', 'name email')
+            .populate('movie', 'title price poster')
+            .sort({ createdAt: -1 });
 
-    } catch {
-        
+        res.status(200).json({
+            success: true,
+            count: rentals.length,
+            rentals
+        });
+    } catch (error) {
+        next(error);
     }
 };
 
