@@ -67,7 +67,7 @@ export const getMyRentals = async (req, res, next) => {
                 message: "Veuillez fournir un userId dans l'URL pour tester (?userId=TON_ID)" 
             });
         }
-        
+
         const activeRentals = await Rental.getActiveRentals(userId);
         const expiredRentals = await Rental.getExpiredRentals(userId);
 
@@ -108,9 +108,32 @@ export const getAllRentals = async (req, res, next) => {
 // @access  Private
 export const cancelRental = async (req, res, next) => {
     try {
+        // On cherche la location avec l'ID passé dans l'URL
+        const rental = await Rental.findById(req.params.id);
 
-    } catch {
-        
+        if (!rental) {
+            return res.status(404).json({ success: false, message: "Location introuvable !" });
+        }
+
+        // On vérifie si elle est annulable
+        if (rental.status !== 'active') {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Impossible d'annuler cette location car son statut est : ${rental.status}` 
+            });
+        }
+
+        // "Soft delete" : on change le statut au lieu de détruire la donnée
+        rental.status = 'cancelled';
+        await rental.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Location annulée avec succès !",
+            rental
+        });
+    } catch (error) {
+        next(error);
     }
 };
 
@@ -119,8 +142,31 @@ export const cancelRental = async (req, res, next) => {
 // @access  Private/Admin
 export const getRentalStats = async (req, res, next) => {
     try {
-
-    } catch {
+        const totalRentals = await Rental.countDocuments();
+        const activeRentals = await Rental.countDocuments({ status: 'active' });
         
+        // Calcul du chiffre d'affaires total généré par les locations grâce à l'agrégation MongoDB
+        const revenueAggregation = await Rental.aggregate([
+            { 
+                $group: { 
+                    _id: null, 
+                    totalRevenue: { $sum: '$price' } 
+                } 
+            }
+        ]);
+
+        const totalRevenue = revenueAggregation.length > 0 ? revenueAggregation[0].totalRevenue : 0;
+
+        res.status(200).json({
+            success: true,
+            stats: {
+                totalRentals,
+                activeRentals,
+                // Arrondi à 2 décimales
+                totalRevenue: Math.round(totalRevenue * 100) / 100 
+            }
+        });
+    } catch (error) {
+        next(error);
     }
 };
