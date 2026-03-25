@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
-import { CartProvider } from './context/CartContext'; // <-- L'import
+import { CartProvider } from './context/CartContext';
 import Home from './pages/Home';
 import MovieDetail from './pages/MovieDetail';
 import MyRentals from './pages/MyRentals';
@@ -10,11 +10,12 @@ import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './utils/ProtectedRoute';
 import Search from './pages/Search';
+import Cart from './pages/Cart';
 
 function App() {
 	return (
 		<AuthProvider>
-			<CartProvider> {/* <-- Ajout du Provider ici */}
+			<CartProvider>
 				<BrowserRouter>
 					<Routes>
 						<Route path="/" element={<Home />} />
@@ -31,6 +32,8 @@ function App() {
 								</ProtectedRoute>
 							} 
 						/>
+
+						<Route path="/cart" element={<Cart />} />
 
 						<Route path="*" element={<NotFound />} />
 					</Routes>

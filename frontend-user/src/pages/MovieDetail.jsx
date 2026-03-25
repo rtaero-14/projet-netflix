@@ -6,14 +6,24 @@ import Loading from '../components/common/Loading';
 import Navbar from '../components/common/Navbar';
 import BreadCrumb from '../components/common/BreadCrumb';
 import Footer from '../components/layout/Footer';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthProvider';
 
 function MovieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const movie = (moviesData || []).find((m) => String(m.id) === String(id));
+  
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // NETTOYAGE : Suppression de l'état local showAddedNotice
+  // const [showAddedNotice, setShowAddedNotice] = useState(false);
+
+  // NETTOYAGE : On n'a plus besoin de setCartNotification ici
+  const { addToCart, isInCart, isRented, rentMovie, getRentalByMovieId } = useCart();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 600);
@@ -41,14 +51,31 @@ function MovieDetail() {
     );
   }
 
+  const rented = isRented(movie.id);
+  const inCart = isInCart(movie.id);
+  const rentalInfo = rented ? getRentalByMovieId(movie.id) : null;
+
+  const formatDate = (isoString) => {
+    if (!isoString) return '';
+    return new Date(isoString).toLocaleDateString('fr-FR');
+  };
+
   const handleAddToCart = () => {
-    const isAuthenticated = localStorage.getItem('user') !== null;
-    if (!isAuthenticated) {
+    if (!isAuthenticated()) {
       navigate('/login', { state: { from: location } });
       return;
     }
+    // NETTOYAGE : addToCart du contexte gère maintenant la notification tout seul
+    addToCart(movie);
+  };
 
-    window.dispatchEvent(new CustomEvent('add-to-cart', { detail: movie }));
+  const handleRentNow = () => {
+    if (!isAuthenticated()) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+    rentMovie(movie);
+    navigate('/my-rentals');
   };
 
   return (
@@ -80,30 +107,57 @@ function MovieDetail() {
                 </div>
 
                 <div className="flex items-center gap-3 mb-2 mt-2">
-                  <Button size="md" className="px-3 py-2" onClick={handleAddToCart}>
-                    ▶ Louer {movie.price}€
-                  </Button>
                   <button
                     onClick={() => setIsLiked((s) => !s)}
-                    className={`ml-2 inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-semibold transition-all cursor-pointer ${isLiked ? 'bg-red-600 text-white' : 'bg-white/10 text-white'}`}>
+                    className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-all cursor-pointer ${isLiked ? 'bg-red-600 text-white' : 'bg-white/10 text-white'}`}>
                     {isLiked ? '♥ Aimé' : "♡ J'aime"}
                   </button>
-                  <Button onClick={() => navigate('/')} className="ml-3 bg-red-600 hover:bg-red-700 text-white px-3 py-2">
-                    Retour à l'accueil
-                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-  <div className="container mx-auto px-4 py-8 mt-8">
+        <div className="container mx-auto px-4 py-8 mt-8">
           <div className="grid md:grid-cols-4 gap-6 items-start">
             <div className="md:col-span-3">
-              {/* Actions moved into the hero overlay above; content starts below the hero */}
-
               <h2 className="text-2xl font-bold mb-4">Synopsis</h2>
               <p className="text-gray-300 leading-relaxed mb-6">{movie.description}</p>
+
+              <div className="flex flex-col sm:flex-row gap-4 mt-8 mb-10">
+                <Button 
+                    onClick={() => navigate('/')} 
+                    className="w-full sm:w-auto bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded font-bold transition-colors cursor-pointer flex items-center justify-center"
+                >
+                     Retour à l'accueil
+                </Button>
+
+                {rented ? (
+                  <div className="bg-green-900/40 border border-green-500 text-green-400 px-6 py-3 rounded font-semibold flex items-center justify-center w-full sm:w-auto">
+                    ✓ Film loué jusqu'au {formatDate(rentalInfo?.expiryDate)}
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleRentNow}
+                      className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded font-bold transition-colors cursor-pointer flex items-center justify-center"
+                    >
+                      Louer maintenant - {movie.price}€
+                    </button>
+
+                    <button
+                      onClick={inCart ? null : handleAddToCart}
+                      className={`px-8 py-3 rounded font-bold transition-colors flex items-center justify-center ${
+                        inCart
+                          ? 'bg-gray-800 border border-gray-500 text-white cursor-default'
+                          : 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer'
+                      }`}
+                    >
+                      {inCart ? '✓ Dans le panier' : '+ Ajouter au panier'}
+                    </button>
+                  </>
+                )}
+              </div>
 
               <div className="bg-gray-900 p-4 rounded">
                 <h4 className="font-semibold mb-2">Informations</h4>
@@ -116,8 +170,10 @@ function MovieDetail() {
               </div>
             </div>
 
-            <div className="md:col-span-1 flex justify-center md:justify-end">
+            <div className="md:col-span-1 flex justify-center md:justify-end relative mt-6 md:mt-0">
               <img src={movie.poster} alt={`${movie.title} poster`} className="w-56 md:w-80 rounded shadow-lg" />
+              
+              {/* NETTOYAGE : L'ancienne notification locale a été supprimée d'ici */}
             </div>
           </div>
         </div>

@@ -13,6 +13,8 @@ export function CartProvider({ children }) {
     return savedRentals ? JSON.parse(savedRentals) : [];
   });
 
+  const [cartNotification, setCartNotification] = useState(null);
+
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
@@ -24,6 +26,12 @@ export function CartProvider({ children }) {
   const addToCart = (movie) => {
     if (!isInCart(movie.id) && !isRented(movie.id)) {
       setCart((prev) => [...prev, movie]);
+      
+      setCartNotification(`"${movie.title}" ajouté au panier !`);
+      
+      setTimeout(() => {
+        setCartNotification(null);
+      }, 3000);
     }
   };
 
@@ -100,6 +108,8 @@ export function CartProvider({ children }) {
   const value = {
     cart,
     rentals,
+    cartNotification,
+    setCartNotification,
     addToCart,
     removeFromCart,
     clearCart,

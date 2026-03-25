@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 export default function MovieDescription({ description }) {
-  // Etat local pour afficher/masquer la description complète
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggle = () => setIsExpanded((s) => !s);

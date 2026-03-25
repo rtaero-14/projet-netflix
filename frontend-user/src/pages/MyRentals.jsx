@@ -1,97 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import Navbar from '../components/common/Navbar';
 import Footer from '../components/layout/Footer';
 
-const getRentalsForCurrentUser = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    if (!user?.email) return [];
+function MyRentals() {
+  const { rentals } = useCart();
 
-    const rentalsByUser = JSON.parse(localStorage.getItem('netflix_rentals_by_user') || '{}');
-    return Array.isArray(rentalsByUser[user.email]) ? rentalsByUser[user.email] : [];
-  } catch {
-    return [];
-  }
-};
+  const activeRentals = rentals.filter(rental => new Date(rental.expiryDate) > new Date());
 
-export default function MyRentals() {
-  const navigate = useNavigate();
-  const [rentals, setRentals] = useState(() => getRentalsForCurrentUser());
-
-  useEffect(() => {
-    const syncRentals = () => {
-      setRentals(getRentalsForCurrentUser());
-    };
-
-    window.addEventListener('rentals-updated', syncRentals);
-    window.addEventListener('storage', syncRentals);
-
-    return () => {
-      window.removeEventListener('rentals-updated', syncRentals);
-      window.removeEventListener('storage', syncRentals);
-    };
-  }, []);
-
-  const formatRentedDate = (rentedAt) => {
-    if (!rentedAt) return 'Date indisponible';
-    const parsed = new Date(rentedAt);
-    if (Number.isNaN(parsed.getTime())) return 'Date indisponible';
-    return parsed.toLocaleDateString('fr-FR');
-  };
+  const expiredRentals = rentals.filter(rental => new Date(rental.expiryDate) <= new Date());
 
   return (
-    <main className="min-h-screen bg-black text-white pt-20 flex flex-col">
-      <div className="container mx-auto px-4 py-12 flex-1">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">Mes locations</h1>
+    <div className="min-h-screen bg-black text-white">
+      <Navbar />
 
-        {rentals.length === 0 ? (
-          <p className="text-gray-300">Vous n'avez encore aucune location.</p>
-        ) : (
-          <>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {rentals.map((rental) => (
-                <article
-                  key={rental.id}
-                  className="bg-gray-900 border border-gray-800 rounded-lg p-3 cursor-pointer hover:border-red-500 transition-colors"
-                  onClick={() => navigate(`/movie/${rental.id}`)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') navigate(`/movie/${rental.id}`);
-                  }}
-                >
-                  <div className="flex gap-3">
+      <div className="container mx-auto px-4 py-24">
+        <h1 className="text-4xl font-bold mb-8">Mes locations</h1>
+
+        {/*Locations actives*/}
+        {activeRentals.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-4 text-green-400">
+              Actives ({activeRentals.length})
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {activeRentals.map(rental => (
+                <div key={rental.id} className="group relative">
+                  <Link to={`/movie/${rental.movieId}`}>
                     <img
-                      src={rental.poster || rental.backdrop || ''}
+                      src={rental.poster}
                       alt={rental.title}
-                      className="w-20 h-28 object-cover rounded"
+                      className="w-full rounded-lg group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div>
-                      <h2 className="font-semibold text-white">{rental.title}</h2>
-                      <p className="text-sm text-gray-400 mt-1">{rental.genre}</p>
-                      <p className="text-sm text-gray-300 mt-2">{(rental.price || 0).toFixed(2)}€</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Loué le {formatRentedDate(rental.rentedAt)}
+                    <div className="mt-2">
+                      <h3 className="font-semibold truncate">{rental.title}</h3>
+                      <p className="text-sm text-green-400">
+                        Expire dans {Math.ceil((new Date(rental.expiryDate) - new Date()) / (1000 * 60 * 60 * 24))} jour(s)
                       </p>
                     </div>
-                  </div>
-                </article>
+                  </Link>
+                </div>
               ))}
             </div>
-          </>
+          </div>
         )}
 
-        <div className="mt-10">
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded cursor-pointer"
-          >
-            Retour a l'accueil
-          </button>
-        </div>
+        {/*Locations expirées*/}
+        {expiredRentals.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4 text-gray-400">
+              Expirées ({expiredRentals.length})
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {expiredRentals.map(rental => (
+                <div key={rental.id} className="opacity-50">
+                  <img
+                    src={rental.poster}
+                    alt={rental.title}
+                    className="w-full rounded-lg grayscale"
+                  />
+                  <div className="mt-2">
+                    <h3 className="font-semibold truncate">{rental.title}</h3>
+                    <p className="text-sm text-red-400">Expiré</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/*Aucune location*/}
+        {rentals.length === 0 && (
+          <div className="text-center py-20">
+            <svg className="w-24 h-24 mx-auto mb-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+            </svg>
+            <p className="text-2xl text-gray-400 mb-6">Aucune location pour le moment</p>
+            <Link to="/">
+              <button className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition">
+                Découvrir des films
+              </button>
+            </Link>
+          </div>
+        )}
       </div>
-      <Footer className="mt-6" />
-    </main>
+      <Footer />
+    </div>
   );
 }
+
+export default MyRentals;

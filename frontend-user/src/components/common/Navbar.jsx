@@ -3,6 +3,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 import SearchBar from './SearchBar';
 import CartButton from './CartButton';
+import CartToast from './CartToast';
 
 function Navbar({ movies = [], onSearch = () => {}, transparentWhenScrolled = false }) {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -32,7 +33,9 @@ function Navbar({ movies = [], onSearch = () => {}, transparentWhenScrolled = fa
         <nav
             className={`fixed top-0 w-full z-50 transition-colors duration-300 ${navBackground}`}
         >
-            <div className="container mx-auto px-4 py-4">
+            <div className="container mx-auto px-4 py-4 relative">
+                <CartToast />
+
                 <div className="flex items-center justify-between">
                     {/*Logo*/}
                     <div className="flex items-center space-x-8">
