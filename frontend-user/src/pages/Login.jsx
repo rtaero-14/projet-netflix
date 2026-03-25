@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthProvider';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
+
   const from = location.state?.from?.pathname || '/';
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
@@ -22,6 +26,7 @@ export default function Login() {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
+    setApiError('');
   };
 
   const handleSubmit = async (e) => {
@@ -34,11 +39,14 @@ export default function Login() {
 
     setLoading(true);
 
-    setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify({ email: formData.email, name: formData.email.split('@')[0] }));
-      setLoading(false);
+    const result = await login(formData.email, formData.password);
+
+    if (result.success) {
       navigate(from, { replace: true });
-    }, 900);
+    } else {
+      setApiError(result.error || "Erreur de connexion");
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,6 +58,12 @@ export default function Login() {
           </div>
 
           <h2 className="text-xl font-semibold mb-4">Se connecter</h2>
+
+          {apiError && (
+            <div className="mb-4 p-3 bg-red-900/50 border border-red-500 text-red-200 text-sm rounded">
+              {apiError}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} noValidate>
             <div className="mb-4">
@@ -81,7 +95,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded cursor-pointer"
+              className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded cursor-pointer disabled:opacity-50"
             >
               {loading ? 'Connexion…' : 'Se connecter'}
             </button>
