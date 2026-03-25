@@ -4,7 +4,6 @@ import cors from 'cors';
 import connectDB from './config/database.js';
 import mongoose from 'mongoose';
 import movieRoutes from './routes/movie.routes.js';
-import rentalRoutes from './routes/rental.routes.js';
 import authRoutes from './routes/auth.routes.js';
 
 // Charger les variables d'environnement
@@ -60,8 +59,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Importer de la route
-import movieRoutes from './routes/movie.routes.js';
 // Utilisation de la Routes API
 app.use('/api/movies', movieRoutes);
 

@@ -1,18 +1,23 @@
 import express from 'express';
 import { 
-    rentMovie, 
+    createRental, 
     getMyRentals, 
-    getAllRentals 
+    getAllRentals, 
+    cancelRental, 
+    getRentalStats, 
+    getRecommendations 
 } from '../controllers/rental.controller.js';
 import { protect, admin } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
 router.use(protect);
+router.get('/my-rentals', getMyRentals);
+router.get('/recommendations', getRecommendations);
 
-router.get('/my', getMyRentals);
-router.post('/', rentMovie);
-
-router.get('/all', admin, getAllRentals);
+router.post('/', createRental);
+router.delete('/:id', cancelRental);
+router.get('/', admin, getAllRentals);
+router.get('/stats', admin, getRentalStats);
 
 export default router;

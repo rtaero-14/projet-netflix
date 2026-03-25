@@ -1,20 +1,21 @@
 import express from 'express';
 import { 
-    getMovies, 
-    getMovie, 
+    getAllMovies, 
+    getMovieById, 
+    getMovieStats, 
     createMovie, 
     updateMovie, 
-    deleteMovie 
+    deleteMovie, 
+    getSimilarMovies 
 } from '../controllers/movie.controller.js';
 import { protect, admin } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-// Routes publiques (Tout le monde peut voir les films)
-router.get('/', getMovies);
-router.get('/:id', getMovie);
-
-// Routes admin (Seul un admin connecté peut modifier le catalogue)
+router.get('/', getAllMovies);
+router.get('/stats', protect, admin, getMovieStats);
+router.get('/:id/similar', getSimilarMovies);
+router.get('/:id', getMovieById);
 router.post('/', protect, admin, createMovie);
 router.put('/:id', protect, admin, updateMovie);
 router.delete('/:id', protect, admin, deleteMovie);

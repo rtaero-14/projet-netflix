@@ -89,7 +89,7 @@ export const login = async (req, res, next) => {
         }
 
         // Vérifier le mot de passe
-        const isMatch = await user.matchPassword(password);
+        const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
@@ -169,7 +169,7 @@ export const changePassword = async (req, res, next) => {
     try {
         const user = await User.findById(req.user.id).select('+password');
 
-        if (!(await user.matchPassword(req.body.currentPassword))) {
+        if (!(await user.comparePassword(req.body.currentPassword))) {
             return res.status(401).json({
                 success: false,
                 message: 'Mot de passe actuel incorrect'
